@@ -8,12 +8,20 @@ import org.joda.time.DateTime;
 
 public class Event {
     public String title;
-    public DateTime time;
+    public String date;
     public String location;
+    public DateTime time;
 
-    public Event(String title, String location, DateTime time) {
+    public boolean allDay = false;
+    public boolean isEmpty = false;
+
+    public Event(String title, String location, String date) {
         this.title = title;
         this.location = location;
-        this.time = time;
+        this.date = date;
+    }
+
+    public static Event emptyEvent(String date) {
+        return new Event(null, null, date);
     }
 }
