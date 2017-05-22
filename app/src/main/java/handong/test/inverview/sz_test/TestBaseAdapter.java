@@ -1,9 +1,5 @@
 package handong.test.inverview.sz_test;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +7,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,8 +29,8 @@ public class TestBaseAdapter extends BaseAdapter implements
     private String[] mDates;
     private List<Event> mEvents;
 
-    private final DateTime START_DATE = new DateTime(2017, 1, 1, 0, 0, 0);
-    private final DateTime END_DATE = new DateTime(2017, 12, 31, 0, 0, 0);
+    private final String START_DATE = "2017-01-01";
+    private final String END_DATE = "2017-01-31";
 
     private final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
 
@@ -45,7 +45,10 @@ public class TestBaseAdapter extends BaseAdapter implements
     // TODO: replace with parameter, pass in from outside caller
     private List<Event> generateEvents() {
         List<Event> events = new ArrayList<>();
-        events.add(new Event("Hello World", "Beijing", "2017-01-01"));
+        events.add(new Event("Event 0", "Beijing", "2017-01-01"));
+        events.add(new Event("Event 1", "Beijing", "2017-01-01"));
+        events.add(new Event("Event 2", "Beijing", "2017-01-03"));
+        events.add(new Event("Event 3", "Beijing", "2017-01-03"));
 
         return events;
     }
@@ -66,17 +69,11 @@ public class TestBaseAdapter extends BaseAdapter implements
     private String[] getDates() {
         List<String> ret = new ArrayList<>();
 
-        Calendar calStart = Calendar.getInstance();
-        calStart.set(2017, Calendar.JANUARY, 1);
-
-        DateTime time = new DateTime(calStart);
-
-        Calendar calEnd = Calendar.getInstance();
-        calEnd.set(2017, Calendar.DECEMBER, 31);
-
-        while (time.getMillis() < calEnd.getTimeInMillis()) {
-            ret.add(time.toString(DATETIME_FORMATTER));
-            time = time.plusDays(1);
+        DateTime startTime = DateTime.parse(START_DATE, DATETIME_FORMATTER);
+        DateTime endTime = DateTime.parse(END_DATE, DATETIME_FORMATTER);
+        while (startTime.getMillis() < endTime.getMillis()) {
+            ret.add(startTime.toString(DATETIME_FORMATTER));
+            startTime = startTime.plusDays(1);
         }
         return ret.toArray(new String[ret.size()]);
     }
@@ -94,24 +91,25 @@ public class TestBaseAdapter extends BaseAdapter implements
     }
 
     private int[] getSectionIndices() {
-        int[] sections = new int[mEvents.size()];
-        String lastEventDate = null;
-        int lastEventIndex = 0;
-        for (int i = 0; i < mEvents.size(); ++i) {
-            Event e = mEvents.get(i);
-            if (e.date.equals(lastEventDate)) {
-                sections[i] = lastEventIndex;
-            } else {
-                lastEventIndex = i;
-                lastEventDate = e.date;
+        ArrayList<Integer> sectionIndices = new ArrayList<Integer>();
+        sectionIndices.add(0);
+        String lastDate = mEvents.get(0).date;
+        for (int i = 1; i < mEvents.size(); i++) {
+            if (!lastDate.equals(mEvents.get(i).date)) {
+                lastDate = mEvents.get(i).date;
+                sectionIndices.add(i);
             }
+        }
+        int[] sections = new int[sectionIndices.size()];
+        for (int i = 0; i < sectionIndices.size(); i++) {
+            sections[i] = sectionIndices.get(i);
         }
         return sections;
     }
 
     @Override
     public int getCount() {
-        return mEvents.size(); //mEvents.size();
+        return mEvents.size();
     }
 
     @Override
@@ -131,13 +129,15 @@ public class TestBaseAdapter extends BaseAdapter implements
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = mInflater.inflate(R.layout.test_list_item_layout, parent, false);
-            holder.text = (TextView) convertView.findViewById(R.id.text);
+            holder.text = (TextView) convertView.findViewById(R.id.textItem);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.text.setText(mEvents.get(position).title);
+        Event e = mEvents.get(position);
+
+        holder.text.setText(e.isEmpty ? "No event." : e.title);
 
         return convertView;
     }
@@ -162,24 +162,36 @@ public class TestBaseAdapter extends BaseAdapter implements
     }
 
     /**
-     * Remember that these have to be static, postion=1 should always return
+     * Remember that these have to be static, position=1 should always return
      * the same Id that is.
      */
     @Override
     public long getHeaderId(int position) {
-        // return the first character of the country as ID because this is what
-        // headers are based upon
-        return position;
+        return mSectionIndices[position];
     }
 
     @Override
     public int getPositionForSection(int section) {
-        return section;
+        if (mSectionIndices.length == 0) {
+            return 0;
+        }
+
+        if (section >= mSectionIndices.length) {
+            section = mSectionIndices.length - 1;
+        } else if (section < 0) {
+            section = 0;
+        }
+        return mSectionIndices[section];
     }
 
     @Override
     public int getSectionForPosition(int position) {
-        return mSectionIndices[position];
+        for (int i = 0; i < mSectionIndices.length; i++) {
+            if (position < mSectionIndices[i]) {
+                return i - 1;
+            }
+        }
+        return mSectionIndices.length - 1;
     }
 
     @Override

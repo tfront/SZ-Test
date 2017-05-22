@@ -15,6 +15,11 @@ public class Event {
     public boolean allDay = false;
     public boolean isEmpty = false;
 
+    public Event(String date, boolean empty) {
+        this.date = date;
+        this.isEmpty = empty;
+    }
+
     public Event(String title, String location, String date) {
         this.title = title;
         this.location = location;
@@ -22,6 +27,6 @@ public class Event {
     }
 
     public static Event emptyEvent(String date) {
-        return new Event(null, null, date);
+        return new Event(date, true);
     }
 }
