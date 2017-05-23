@@ -1,5 +1,9 @@
 package handong.test.inverview.sz_test;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,12 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,8 +94,9 @@ public class TestBaseAdapter extends BaseAdapter implements
         sectionIndices.add(0);
         String lastDate = mEvents.get(0).date;
         for (int i = 1; i < mEvents.size(); i++) {
-            if (!lastDate.equals(mEvents.get(i).date)) {
-                lastDate = mEvents.get(i).date;
+            String date = mEvents.get(i).date;
+            if (!lastDate.equals(date)) {
+                lastDate = date;
                 sectionIndices.add(i);
             }
         }
@@ -105,6 +105,18 @@ public class TestBaseAdapter extends BaseAdapter implements
             sections[i] = sectionIndices.get(i);
         }
         return sections;
+//        int[] sections = new int[mEvents.size()];
+//        String lastDate = null;
+//        int lastIndex = 0;
+//        for (int index = 0; index < mEvents.size(); ++index) {
+//            Event e = mEvents.get(index);
+//            if (!e.date.equals(lastDate)) {
+//                lastDate = e.date;
+//                lastIndex = index;
+//            }
+//            sections[index] = lastIndex;
+//        }
+//        return sections;
     }
 
     @Override
@@ -156,7 +168,7 @@ public class TestBaseAdapter extends BaseAdapter implements
         }
 
         // set header text as first char in name
-        holder.text.setText(mDates[position]);
+        holder.text.setText(mDates[getSectionForPosition(position)]);
 
         return convertView;
     }
@@ -167,7 +179,7 @@ public class TestBaseAdapter extends BaseAdapter implements
      */
     @Override
     public long getHeaderId(int position) {
-        return mSectionIndices[position];
+        return getSectionForPosition(position);
     }
 
     @Override
@@ -206,5 +218,4 @@ public class TestBaseAdapter extends BaseAdapter implements
     class ViewHolder {
         TextView text;
     }
-
 }

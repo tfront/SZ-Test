@@ -35,6 +35,7 @@ public class CalendarActivity extends AppCompatActivity {
         });
 
         mList = (StickyListHeadersListView)findViewById(R.id.list);
+        mList.addHeaderView(getLayoutInflater().inflate(R.layout.header, null));
         mAdapter = new TestBaseAdapter(this);
         mList.setAdapter(mAdapter);
     }
